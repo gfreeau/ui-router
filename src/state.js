@@ -750,6 +750,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
      * - **`relative`** - {object=}, When transitioning with relative path (e.g '^'), 
      *    defines which state to be relative from.
      * - **`notify`** - {boolean=true}, If `true` will broadcast $stateChangeStart and $stateChangeSuccess events.
+     * - **`resume`** - {boolean=false}, If `true` will broadcast $stateChangeSuccess event only
      * - **`reload`** (v0.2.5) - {boolean=false}, If `true` will force transition even if the state or params 
      *    have not changed, aka a reload of the same state. It differs from reloadOnSearch because you'd
      *    use this when you want to force a reload when *everything* is the same, including search params.
@@ -760,7 +761,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
     $state.transitionTo = function transitionTo(to, toParams, options) {
       toParams = toParams || {};
       options = extend({
-        location: true, inherit: false, relative: null, notify: true, reload: false, $retry: false
+        location: true, inherit: false, relative: null, notify: true, resume: false, reload: false, $retry: false
       }, options || {});
 
       var from = $state.$current, fromParams = $state.params, fromPath = from.path;
@@ -818,7 +819,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
       toParams = filterByKeys(objectKeys(to.params), toParams || {});
 
       // Broadcast start event and cancel the transition if requested
-      if (options.notify) {
+      if (options.notify && !options.resume) {
         /**
          * @ngdoc event
          * @name ui.router.state.$state#$stateChangeStart
@@ -909,7 +910,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
           });
         }
 
-        if (options.notify) {
+        if (options.notify || options.resume) {
         /**
          * @ngdoc event
          * @name ui.router.state.$state#$stateChangeSuccess
